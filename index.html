@@ -1,0 +1,442 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>مكتبة SVG عربية — مثال</title>
+  <!-- خطوط عربية عصرية -->
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      /* dark mode defaults */
+      --bg: #0f1114;
+      --card: #1f2226;
+      --muted: #9aa0a6;
+      --text: #eceff3;
+      --glass: rgba(255,255,255,0.04);
+      --accent: #7b61ff;
+      --border: rgba(255,255,255,0.06);
+
+      /* light mode vars (used when .light class applied) */
+      --light-bg: #f6f7fb;
+      --light-card: #ffffff;
+      --light-muted: #6b7280;
+      --light-text: #11111a;
+      --light-glass: rgba(0,0,0,0.03);
+      --light-border: rgba(0,0,0,0.08);
+    }
+
+    html,body{height:100%;margin:0;font-family:'Cairo',system-ui,Arial;}
+
+    /* smooth theme transitions */
+    body{background:var(--bg);color:var(--text);line-height:1.3;transition:background .28s ease,color .28s ease}
+    .card, .search, .filter, .icon-btn, .modal{transition:background .28s ease,box-shadow .28s ease,color .28s ease, border-color .28s ease}
+
+    /* layout */
+    .app{display:flex;gap:24px;padding:28px;min-height:100vh;box-sizing:border-box}
+
+    /* vertical ad slot (محجوب افتراضياً). لو حطيت data-visible="true" يظهر */
+    .ads{width:160px;flex:0 0 160px;padding:12px}
+    .ads .placeholder{height:760px;background-image:repeating-linear-gradient(0deg,#f6d35a 0 30px,#f6d35a00 30px,#f6d35a00 60px);display:flex;align-items:center;justify-content:center;font-weight:700}
+    .ads{display:none} /* مخفي — ضع attribute data-visible="true" لاظهاره */
+
+    /* horizontal ad slot تحت الهيدر (مخفية افتراضياً) */
+    .ad-hor{height:90px;margin:12px 0;border-radius:8px;padding:8px}
+    .ad-hor{display:none} /* مخفي — ضع attribute data-visible="true" لاظهاره */
+
+    /* main */
+    .main{flex:1;display:flex;flex-direction:column;gap:12px}
+
+    /* header */
+    .header{display:flex;align-items:center;justify-content:space-between;gap:16px}
+
+    /* مكان يحمل لوجو PNG فقط — المستخدم يحط src بنفسه */
+    .logo-placeholder{display:flex;align-items:center;gap:12px}
+    .logo-placeholder img{width:68px;height:68px;border-radius:10px;object-fit:contain;display:block;background:transparent;transition:filter .28s ease}
+
+    .controls{display:flex;gap:12px;align-items:center}
+    .search{flex:1;display:flex;align-items:center;background:var(--card);padding:12px 16px;border-radius:28px;box-shadow:0 6px 20px rgba(0,0,0,0.6)}
+    .search input{flex:1;background:transparent;border:0;outline:none;color:inherit;font-size:18px}
+
+    /* dropdown filters */
+    .filter{position:relative;background:var(--card);padding:10px 14px;border-radius:14px;cursor:pointer;box-shadow:0 6px 16px rgba(0,0,0,0.6)}
+    .dd{position:absolute;top:calc(100% + 8px);right:0;background:var(--card);border-radius:10px;padding:8px;box-shadow:0 10px 30px rgba(0,0,0,0.6);display:none;z-index:40}
+    .dd button{display:block;width:100%;text-align:right;padding:6px 10px;border-radius:8px;background:transparent;border:0;color:inherit;cursor:pointer}
+
+    /* grid */
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px}
+    .card{background:var(--card);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:12px;box-shadow:0 8px 26px rgba(0,0,0,0.6);transition:transform .18s ease,box-shadow .18s}
+    .card:hover{transform:translateY(-6px);box-shadow:0 20px 40px rgba(0,0,0,0.6)}
+
+    /* preview types */
+    .preview{display:flex;gap:12px;align-items:center}
+    .img{background:transparent;border-radius:12px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center}
+    .img.square{width:96px;height:96px}
+    .img.rectangle{width:220px;height:96px;border-radius:14px}
+    .img img{max-width:92%;max-height:92%;display:block}
+
+    .meta{flex:1}
+    .name{font-size:20px;font-weight:700}
+    .sub{color:var(--muted);font-size:14px;margin-top:6px}
+
+    .formats{display:flex;gap:8px;align-items:center}
+    .fmt{background:var(--glass);padding:6px 8px;border-radius:8px;font-size:13px;color:var(--muted);}
+
+    .actions{display:flex;gap:10px;align-items:center;justify-content:flex-start}
+    .icon-btn{width:44px;height:44px;border-radius:10px;background:transparent;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer}
+
+    /* inlined svg icons use currentColor */
+    .icon-svg{width:18px;height:18px;display:inline-block;vertical-align:middle;color:var(--text)}
+
+    /* modal */
+    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;padding:28px;z-index:60}
+    .modal{width:min(920px,95%);background:var(--card);Padding:22px;border-radius:18px;box-shadow:0 40px 120px rgba(0,0,0,0.7)}
+    .modal .modal-grid{display:flex;gap:18px}
+    .modal .images{flex:0 0 320px;display:flex;flex-direction:column;gap:12px}
+    .modal .images img{width:100%;border-radius:12px}
+    .modal .detail{flex:1}
+
+    /* fixed dark mode button */
+    .theme-toggle{position:fixed;left:22px;bottom:22px;width:70px;height:70px;border-radius:20px;background:var(--card);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 30px rgba(0,0,0,0.6);cursor:pointer;z-index:80;border:1px solid var(--border)}
+
+    /* loader */
+    .loader{display:flex;align-items:center;justify-content:center;padding:28px}
+
+    /* small screens */
+    @media (max-width:900px){.ads{display:none}.app{padding:16px}.grid{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}}
+
+    /* light mode styles (تطبّق عندما يحتوي الـbody على class .light) */
+    body.light{
+      --bg: var(--light-bg);
+      --card: var(--light-card);
+      --muted: var(--light-muted);
+      --text: var(--light-text);
+      --glass: var(--light-glass);
+      --border: var(--light-border);
+    }
+
+    select,input,button{font-family:'Cairo'}
+  </style>
+</head>
+<body>
+  <div class="app" id="app">
+    <!-- جهة الشمال مكان اعلان عمودي (مخفي افتراضياً). لتظهيره اضف attribute data-visible="true" الى .ads -->
+    <aside class="ads" aria-hidden="true">
+      <div class="placeholder">مساحة إعلان عمودية</div>
+    </aside>
+
+    <main class="main">
+      <header class="header">
+        <!-- هنا مكان شعار PNG فقط — حط الملفات التالية في نفس المجلد: logo.png (افتراضي), logo-dark.png (اختياري), logo-light.png (اختياري) -->
+        <div class="logo-placeholder">
+          <img id="siteLogo" src="logo.png" alt="لوغو الموقع" aria-hidden="true"/>
+        </div>
+
+        <div class="controls" style="flex:1">
+          <div class="search" aria-hidden>
+            <!-- ايقونة السيرش سيضعها المستخدم بنفسه هنا -->
+            <input id="searchInput" placeholder="ابحث عن عنصر أو اسم..." />
+          </div>
+
+          <div class="filter" id="categoryBtn">الفئة ▾
+            <div class="dd" id="categoryDd"></div>
+          </div>
+
+          <div class="filter" id="countryBtn">البلد ▾
+            <div class="dd" id="countryDd"></div>
+          </div>
+        </div>
+
+      </header>
+
+      <!-- مساحة افقية للاعلانات تحت الهيدر (مخفية افتراضياً). لتظهيرها اضف attribute data-visible="true" الى .ad-hor -->
+      <div class="ad-hor" aria-hidden="true">
+        <!-- ضع هنا كود ادسنس الافقي -->
+      </div>
+
+      <section class="grid" id="grid"></section>
+
+      <div class="loader" id="loader">جاري التحميل...</div>
+
+    </main>
+  </div>
+
+  <!-- زر تبديل الداكن / الفاتح -->
+  <button class="theme-toggle" id="themeToggle" title="تبديل الوضع" aria-label="تبديل الوضع">
+    <svg id="themeIcon" width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 3v2M12 19v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+
+  <!-- modal -->
+  <div class="modal-backdrop" id="modal">
+    <div class="modal" role="dialog" aria-modal="true">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div style="font-weight:800;font-size:20px" id="modalTitle">اسم العنصر</div>
+        <div style="display:flex;gap:8px">
+          <button class="icon-btn" id="modalShare" title="مشاركة" aria-label="مشاركة"><img class="icon" data-src="share.svg" alt="مشاركة" width="18" height="18"/></button>
+          <button class="icon-btn" id="modalDownload" title="تحميل" aria-label="تحميل"><img class="icon" data-src="download.svg" alt="تحميل" width="18" height="18"/></button>
+        </div>
+      </div>
+      <div class="modal-grid">
+        <div class="images" id="modalImages"></div>
+        <div class="detail">
+          <div id="modalMeta" style="color:var(--muted)"></div>
+          <hr style="margin:12px 0;border:none;border-top:1px solid rgba(255,255,255,0.06)">
+          <div style="font-weight:700;margin-bottom:8px">عناصر مشابهة:</div>
+          <div id="similar" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ========== بيانات تجريبية ==========
+    const DATA = [];
+    const COUNTRIES = ['مصر','السعودية','المغرب','الجزائر','الأردن','لبنان','الإمارات'];
+    const CATEGORIES = ['شعارات','أيقونات','خطوط','عناصر واجهة','رموز'];
+    // توليد عناصر تجريبية مع خصائص layout لتحديد نوع العرض
+    for(let i=1;i<=120;i++){
+      const c = COUNTRIES[i % COUNTRIES.length];
+      const cat = CATEGORIES[i % CATEGORIES.length];
+      const layout = (i%4===0)? 'both' : (i%3===0)? 'mark':'type';
+      const imgs = (layout==='both')? ["/mnt/data/New Project - 2025-09-14T160909.546.png","/mnt/data/New Project - 2025-09-14T165750.007.png"] : (layout==='type')? ["/mnt/data/New Project - 2025-09-14T165750.007.png"] : ["/mnt/data/New Project - 2025-09-14T160909.546.png"];
+      DATA.push({ id:i, name: `${cat} ${i}`, country: c, category: cat, layout, images: imgs, formats: ['svg','png','pdf'], downloadUrl: '/download/sample-' + i + '.zip' })
+    }
+
+    // ========== حالات التطبيق ===========
+    let offset = 0; const BATCH = 20; let loading=false; let currentFilter = {q:'',country: null,category: null};
+    const grid = document.getElementById('grid');
+    const loader = document.getElementById('loader');
+
+    async function inlineAllIcons(root=document){
+      const imgs = root.querySelectorAll('img.icon[data-src]');
+      for(const img of imgs){
+        try{
+          const url = img.getAttribute('data-src');
+          const res = await fetch(url);
+          if(!res.ok) continue;
+          const text = await res.text();
+          const doc = new DOMParser().parseFromString(text,'image/svg+xml');
+          const svg = doc.querySelector('svg');
+          if(!svg) continue;
+          svg.setAttribute('class','icon-svg');
+          svg.setAttribute('aria-hidden','true');
+          svg.removeAttribute('width'); svg.removeAttribute('height');
+          // force currentColor so it follows theme
+          svg.setAttribute('fill','currentColor');
+          svg.setAttribute('stroke','currentColor');
+          // ======= التعديل البسيط هنا: نجبر كل العناصر الداخلية على استخدام currentColor =======
+          try{
+            // لكل عنصر داخلي: لو فيه fill أو stroke أو ستايل داخلي، نعطيه currentColor
+            svg.querySelectorAll('*').forEach(el=>{
+              if(el.hasAttribute('fill')) el.setAttribute('fill','currentColor');
+              if(el.hasAttribute('stroke')) el.setAttribute('stroke','currentColor');
+              // إذا كان هناك ستايل inline محدد، نحاول تغييره
+              if(el.style){
+                if(el.style.fill) el.style.fill = 'currentColor';
+                if(el.style.stroke) el.style.stroke = 'currentColor';
+              }
+            });
+          }catch(e){ /* إذا حصل خطأ، تجاهل — لا نريد كسر الصفحة */ }
+
+          img.replaceWith(svg);
+        }catch(e){ /* ignore fetch errors */ }
+      }
+    }
+
+    function renderCard(item){
+      const el = document.createElement('article'); el.className='card';
+
+      const preview = document.createElement('div'); preview.className='preview';
+
+      // بناء العرض بحسب layout
+      if(item.layout === 'both'){
+        const square = document.createElement('div'); square.className='img square';
+        const sImg = document.createElement('img'); sImg.src = item.images[0]; sImg.alt = item.name + ' mark'; square.appendChild(sImg);
+
+        const rect = document.createElement('div'); rect.className='img rectangle';
+        const rImg = document.createElement('img'); rImg.src = item.images[1]; rImg.alt = item.name + ' type'; rect.appendChild(rImg);
+
+        preview.appendChild(square); preview.appendChild(rect);
+      } else if(item.layout === 'type'){
+        const rect = document.createElement('div'); rect.className='img rectangle';
+        const rImg = document.createElement('img'); rImg.src = item.images[0]; rImg.alt = item.name + ' type'; rect.appendChild(rImg);
+        preview.appendChild(rect);
+      } else { // mark only
+        const square = document.createElement('div'); square.className='img square';
+        const sImg = document.createElement('img'); sImg.src = item.images[0]; sImg.alt = item.name + ' mark'; square.appendChild(sImg);
+        preview.appendChild(square);
+      }
+
+      const meta = document.createElement('div'); meta.className='meta';
+      const name = document.createElement('div'); name.className='name'; name.textContent = item.name;
+      const sub = document.createElement('div'); sub.className='sub'; sub.textContent = `${item.country} • ${item.category}`;
+      const formats = document.createElement('div'); formats.className='formats';
+      item.formats.forEach(f=>{ const s=document.createElement('div'); s.className='fmt'; s.textContent=f; formats.appendChild(s) });
+      meta.appendChild(name); meta.appendChild(sub); meta.appendChild(formats);
+
+      const actions = document.createElement('div'); actions.className='actions';
+
+      // زر التحميل — يحوي data-src حتى نعمل inline لاحقًا
+      const dl = document.createElement('button'); dl.className='icon-btn'; dl.title='تحميل'; dl.setAttribute('data-icon','download');
+      dl.innerHTML = '<img class="icon" data-src="download.svg" alt="تحميل" width="18" height="18"/>';
+      dl.addEventListener('click', (e)=>{ e.stopPropagation(); triggerDownload(item); });
+
+      // زر المشاركة — يحوي data-src
+      const sh = document.createElement('button'); sh.className='icon-btn'; sh.title='مشاركة'; sh.setAttribute('data-icon','share');
+      sh.innerHTML = '<img class="icon" data-src="share.svg" alt="مشاركة" width="18" height="18"/>';
+      sh.addEventListener('click', (e)=>{ e.stopPropagation(); shareItem(item); });
+
+      // زر العرض — يحوي data-src
+      const op = document.createElement('button'); op.className='icon-btn'; op.title='عرض'; op.setAttribute('data-icon','view');
+      op.innerHTML = '<img class="icon" data-src="eye.svg" alt="عرض" width="18" height="18"/>';
+      op.addEventListener('click', (e)=>{ e.stopPropagation(); openModal(item); });
+
+      actions.appendChild(dl); actions.appendChild(sh); actions.appendChild(op);
+
+      el.appendChild(preview);
+      el.appendChild(meta);
+      el.appendChild(actions);
+
+      // عند الضغط على الكارد نفسه تفتح النافذة
+      el.addEventListener('click', ()=> openModal(item));
+      return el;
+    }
+
+    // تحميل دفعة
+    async function loadMore(){
+      if(loading) return; loading=true; loader.style.display='flex';
+      setTimeout(async ()=>{
+        const items = applyFilter(DATA).slice(offset, offset + BATCH);
+        items.forEach(it=> grid.appendChild(renderCard(it)));
+        // بعد اضافة عناصر جديدة نعمل inline للأيقونات داخلهم
+        await inlineAllIcons(grid);
+        offset += items.length; loading=false; loader.style.display = (offset<applyFilter(DATA).length)?'flex':'none';
+      }, 250);
+    }
+
+    function applyFilter(list){
+      return list.filter(i=>{
+        if(currentFilter.q && !i.name.toLowerCase().includes(currentFilter.q.toLowerCase())) return false;
+        if(currentFilter.country && i.country !== currentFilter.country) return false;
+        if(currentFilter.category && i.category !== currentFilter.category) return false;
+        return true;
+      })
+    }
+
+    // ملء dropdowns
+    const categoryDd = document.getElementById('categoryDd');
+    CATEGORIES.forEach(c=>{ const b=document.createElement('button'); b.textContent=c; b.addEventListener('click', ()=>{ currentFilter.category = c; offset=0; grid.innerHTML=''; loadMore(); closeAllDd(); }); categoryDd.appendChild(b); });
+    const countryDd = document.getElementById('countryDd');
+    COUNTRIES.forEach(c=>{ const b=document.createElement('button'); b.textContent=c; b.addEventListener('click', ()=>{ currentFilter.country = c; offset=0; grid.innerHTML=''; loadMore(); closeAllDd(); }); countryDd.appendChild(b); });
+
+    function closeAllDd(){ document.querySelectorAll('.dd').forEach(d=>d.style.display='none'); }
+    document.getElementById('categoryBtn').addEventListener('click',(e)=>{ e.stopPropagation(); const dd=document.getElementById('categoryDd'); dd.style.display = (dd.style.display==='block')? 'none':'block'; });
+    document.getElementById('countryBtn').addEventListener('click',(e)=>{ e.stopPropagation(); const dd=document.getElementById('countryDd'); dd.style.display = (dd.style.display==='block')? 'none':'block'; });
+    window.addEventListener('click', ()=> closeAllDd());
+
+    // بحث تفاعلي
+    const searchInput = document.getElementById('searchInput');
+    searchInput.addEventListener('input', ()=>{ currentFilter.q = searchInput.value.trim(); offset=0; grid.innerHTML=''; loadMore(); });
+
+    // infinite scroll
+    window.addEventListener('scroll', ()=>{
+      const nearBottom = window.innerHeight + window.scrollY >= document.body.offsetHeight - 900;
+      if(nearBottom && !loading && offset < applyFilter(DATA).length){ loadMore(); }
+    })
+
+    // تحميل مباشر ويعيد تحميل الصفحة لتجديد الاعلانات
+    function triggerDownload(item){
+      const a = document.createElement('a'); a.href = item.downloadUrl; a.download = ''; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(()=> location.reload(), 1200);
+    }
+
+    // مشاركة — افتراضي ينسخ رابط العنصر
+    function shareItem(item){
+      const url = location.origin + '/item/' + item.id; navigator.clipboard?.writeText(url).then(()=> alert('تم نسخ رابط العنصر'))
+    }
+
+    // Modal
+    const modal = document.getElementById('modal');
+    const modalImages = document.getElementById('modalImages');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalMeta = document.getElementById('modalMeta');
+    const similarBox = document.getElementById('similar');
+    function openModal(item){
+      modalTitle.textContent = item.name;
+      modalMeta.textContent = `الفئة: ${item.category} · البلد: ${item.country} · الصيغ: ${item.formats.join(', ')}`;
+      modalImages.innerHTML = '';
+      item.images.forEach(src=>{ const im = document.createElement('img'); im.src = src; modalImages.appendChild(im); });
+      similarBox.innerHTML='';
+      const sims = DATA.filter(d=> d.id!==item.id && (d.country===item.country || d.category===item.category)).slice(0,6);
+      sims.forEach(s=>{
+        const b = document.createElement('div'); b.className='card'; b.style.width='150px'; b.style.padding='10px';
+        b.innerHTML = `<div style=\"display:flex;align-items:center;gap:8px\"><div style=\"width:48px;height:48px;border-radius:8px;background:rgba(255,255,255,0.03);display:flex;align-items:center;justify-content:center\"><img src='${s.images[0]}' style='max-width:86%;max-height:86%'/></div><div style=\"font-weight:700;font-size:13px\">${s.name}</div></div>`;
+        b.addEventListener('click', ()=> openModal(s));
+        similarBox.appendChild(b);
+      })
+      modal.style.display='flex';
+    }
+    document.getElementById('modal').addEventListener('click', (e)=>{ if(e.target.id==='modal') modal.style.display='none'; })
+
+    // handle logo switching for themes (tries logo-dark.png / logo-light.png, falls back to filter invert)
+    async function setLogoForTheme(light){
+      const logo = document.getElementById('siteLogo');
+      // clear filter by default
+      logo.style.filter = '';
+      try{
+        if(light){
+          // try logo-light.png then fallback to logo.png
+          const res = await fetch('logo-light.png', {method:'HEAD'});
+          if(res.ok) { logo.src = 'logo-light.png'; logo.style.filter = ''; return; }
+          logo.src = 'logo.png'; logo.style.filter = '';
+        } else {
+          // try logo-dark.png then fallback to invert filter
+          const res = await fetch('logo-dark.png', {method:'HEAD'});
+          if(res.ok) { logo.src = 'logo-dark.png'; logo.style.filter = ''; return; }
+          // fallback: use same logo but invert colors
+          logo.src = 'logo.png'; logo.style.filter = 'invert(1)';
+        }
+      }catch(e){
+        // network or file not found — fallback to filter
+        logo.src = 'logo.png';
+        logo.style.filter = light ? '' : 'invert(1)';
+      }
+    }
+
+    // theme toggle — متناسق تمامًا ويرجع الحالة للمستخدم
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon = document.getElementById('themeIcon');
+    async function setTheme(light){
+      if(light){
+        document.body.classList.add('light');
+        localStorage.setItem('site-theme','light');
+        // تغيير ايقونة الى شمس
+        themeIcon.innerHTML = '<path d="M12 3v2M12 19v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>';
+      } else {
+        document.body.classList.remove('light');
+        localStorage.setItem('site-theme','dark');
+        // ايقونة قمر
+        themeIcon.innerHTML = '<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>';
+      }
+      // update logo and inline icons color
+      await setLogoForTheme(light);
+      // inline icons (if any left as <img>) will be replaced and use currentColor
+      await inlineAllIcons();
+      // update color style for inlined svgs (they use currentColor)
+      document.querySelectorAll('.icon-svg').forEach(s=> s.style.color = getComputedStyle(document.body).getPropertyValue('--text'));
+    }
+    themeToggle.addEventListener('click', ()=> setTheme(!document.body.classList.contains('light')));
+    // افتراضياً نقرأ من التخزين
+    (async function(){ const t = localStorage.getItem('site-theme'); if(t==='light') await setTheme(true); else await setTheme(false); })();
+
+    // init
+    loadMore();
+
+    // ملاحظات للمطور/المالك:
+    // - استبدل DATA بطلب fetch('/data.json') لتحميل ~3000 عنصر من السيرفر
+    // - ضع كود Google Adsense داخل .ads و .ad-hor و اضف data-visible=\"true\" لاظهار المساحات
+    // - ضع ملفات: logo.png, logo-dark.png (اختياري), logo-light.png (اختياري), eye.svg, download.svg, share.svg في نفس مجلد الصفحة
+    // - اذا حبيت احول الأيقونات الى inline داخل ملفات html نهائيًا اقدر اساعدك
+  </script>
+</body>
+</html>
