@@ -278,7 +278,7 @@
 
       // زر التحميل — يحوي data-src حتى نعمل inline لاحقًا
       const dl = document.createElement('button'); dl.className='icon-btn'; dl.title='تحميل'; dl.setAttribute('data-icon','download');
-      dl.innerHTML = '<img class="icon" data-src="download.svg" alt="تحميل" width="18" height="18"/>';
+      dl.innerHTML = '<img class="icon" data-src="download.svg" alt="تحميل" width="10" height="10"/>';
       dl.addEventListener('click', (e)=>{ e.stopPropagation(); triggerDownload(item); });
 
       // زر المشاركة — يحوي data-src
@@ -440,5 +440,6 @@
   </script>
 </body>
 </html>
+
 
 
