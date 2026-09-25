@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN"    "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
+
+<svg  
+xmlns="http://www.w3.org/2000/svg" 
+xmlns:xlink="http://www.w3.org/1999/xlink" 
+width="595.276" 
+height="113.385" 
+viewBox="0 0 595.276 113.385"
+style="overflow:visible;enable-background:new 0 0 595.276 113.385" xml:space="preserve">
+
+<g id="Logo">
+<rect style="fill:none;" width="595.276" height="113.385"/> 
+
+<g>
+	<polygon style="fill:#000;" points="581.102,14.173 558.245,14.173 558.245,66.505 558.245,67.008 558.245,76.57 
+		454.399,76.57 454.399,99.212 581.102,99.212 "/>
+	<path style="fill:#000;" d="M224.372,66.505v10.566h21.343V66.505h16.397v10.566h17.391V66.505h169.433h5.464h93.909V14.173
+		h-52.171v30.695h-37.266V25.244h-25.34v19.624h-14.41V25.244h-24.844v19.624h-13.415V25.244h-22.856v19.624h-41.737V14.173
+		h-20.371v30.695h-82.479V25.244h-25.34v19.624h-15.403V25.244h-25.838v19.624h-14.906V25.244h-26.334v50.32H39.017V14.173
+		H14.173v85.039h117.758V66.505H224.372z M515.514,30.527h14.162v14.341h-14.162V30.527z"/>
+</g>
+
+</g>
+
+</svg>
